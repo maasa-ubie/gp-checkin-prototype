@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>GP チェックイン〜問診フロー v3</title>
+<title>GP チェックイン〜問診フロー v5</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&display=swap');
   * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -264,6 +264,45 @@
   }
   .entry-badge.first { background: #EEF2FF; color: var(--accent); }
   .entry-badge.return { background: #ECFDF5; color: #059669; }
+  .entry-badge.memory { background: #FFF7ED; color: #C2410C; }
+
+  .confirm-card {
+    background: var(--card-bg); border-radius: var(--radius); padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); animation: slideUp 0.4s ease; margin-left: 40px;
+  }
+  .confirm-card-header {
+    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
+    color: var(--text-secondary); margin-bottom: 12px;
+  }
+  .confirm-card-body { font-size: 13px; color: var(--text-primary); line-height: 1.8; }
+  .confirm-card-row { display: flex; align-items: baseline; gap: 8px; }
+  .confirm-card-row .clabel { color: var(--text-secondary); min-width: 60px; flex-shrink: 0; font-size: 12px; }
+  .confirm-card-row .cvalue { flex: 1; }
+  .confirm-card-sub { font-size: 12px; color: var(--text-muted); margin-left: 68px; }
+  .confirm-card-divider { height: 1px; background: var(--border); margin: 8px 0; }
+  .confirm-card-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .confirm-card-btn {
+    flex: 1; padding: 10px; border-radius: var(--radius-xs); font-size: 13px;
+    font-weight: 600; cursor: pointer; font-family: inherit; border: 1.5px solid var(--border);
+    background: white; color: var(--text-primary); transition: all 0.2s;
+  }
+  .confirm-card-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .confirm-card-btn:hover { opacity: 0.85; }
+
+  .signal-card {
+    background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: var(--radius); padding: 16px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06); animation: slideUp 0.4s ease; margin-left: 40px;
+  }
+  .signal-card-header {
+    display: flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 600;
+    color: #92400E; margin-bottom: 10px;
+  }
+  .signal-quote {
+    font-size: 13px; color: var(--text-primary); line-height: 1.7;
+    padding: 8px 12px; background: rgba(255,255,255,0.7); border-radius: var(--radius-xs);
+    margin-bottom: 4px; border-left: 3px solid #FCD34D;
+  }
+  .signal-date { font-size: 11px; color: var(--text-muted); text-align: right; margin-bottom: 8px; }
 </style>
 </head>
 <body>
@@ -293,6 +332,10 @@
         <button class="entry-mode-btn" onclick="selectMode('return')">
           <div class="mode-title">アプリ2回目以降 <span class="entry-badge return">再来</span></div>
           <div class="mode-desc">前回の情報をもとに差分のみ確認<br>チェックイン → 問診（体調変化・服薬・生活の変化・先生への相談・セレンディピティ）</div>
+        </button>
+        <button class="entry-mode-btn" onclick="selectMode('memory')">
+          <div class="mode-title">記憶蓄積あり <span class="entry-badge memory">蓄積</span></div>
+          <div class="mode-desc">日常チャット + マイナ連携データがある状態<br>チェックイン → 確認型問診（要約提示・確認・補足・シグナル検出）</div>
         </button>
       </div>
     </div>
@@ -481,6 +524,7 @@ function selectMode(mode) {
   }
 }
 
+
 function resetAndGoEntry() {
   chatStarted = false;
   freeTextUsedCount = 0;
@@ -494,7 +538,10 @@ function goToScreen(id) {
   if (id === 'screen-checkin-done') {
     const desc = document.getElementById('checkinDoneDesc');
     const time = document.getElementById('checkinDoneTime');
-    if (visitMode === 'return') {
+    if (visitMode === 'memory') {
+      desc.innerHTML = 'ふだんの会話やお薬データをもとに<br>受診メモのドラフトを作ったよ。<br>確認してね。';
+      time.textContent = '⏱ 1〜2分ほどで終わります';
+    } else if (visitMode === 'return') {
       desc.innerHTML = '先生があなたの状態を事前に把握でき、<br>診察の時間をより有効に使えます。<br>前回の回答をもとに更新できます。';
       time.textContent = '⏱ 2〜3分ほどで終わります';
     } else {
@@ -532,6 +579,38 @@ function goToScreen(id) {
           <span>不眠（寝つきが悪い・1ヶ月前から） <span class="tag new">💡NEW</span></span>
         </div>
         <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 本人は「歳のせい」と思っていた</span></div>`;
+    } else if (visitMode === 'memory') {
+      s.innerHTML = `
+        <div class="summary-title">📋 先生に届く受診メモ（記憶蓄積あり）</div>
+        <div class="summary-item"><span class="label">通院中</span><span>高血圧</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-title" style="margin-top:4px;">💊 服薬（マイナ連携）</div>
+        <div class="summary-item"><span class="label">処方薬</span><span>アムロジピン 5mg</span></div>
+        <div class="summary-item"><span class="label">飲み忘れ</span><span>月2回程度（チャット記録）</span></div>
+        <div class="summary-item"><span class="label">アレルギー</span><span>なし</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-title" style="margin-top:4px;">🩺 最近の体調（チャット記録） <span class="tag new">⚠ 注目</span></div>
+        <div class="summary-item"><span class="label">頭痛</span><span>先週3回（4/2, 4/4, 4/6）</span></div>
+        <div class="summary-item"><span class="label">血圧</span><span>安定傾向（家庭測定 平均134/82）</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-title" style="margin-top:4px;">🥗 生活（チャット記録：直近2週間）</div>
+        <div class="summary-item"><span class="label">食事</span><span>外食8回 / 自炊6回</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 前回より外食減少</span></div>
+        <div class="summary-item"><span class="label">運動</span><span>散歩3回（日曜30分）</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 先月より増加</span></div>
+        <div class="summary-item"><span class="label">飲酒</span><span>ほぼ毎日（ビール1本）変わらず</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-title" style="margin-top:4px;">🗣 患者が伝えたいこと</div>
+        <div class="summary-item"><span class="label">相談</span><span>薬を飲み続けるのがつらい</span></div>
+        <div class="summary-item"><span class="label">相談</span><span>仕事のストレスで食事が乱れがち</span></div>
+        <div class="summary-divider"></div>
+        <div class="summary-item">
+          <span class="label">検出</span>
+          <span>不眠のシグナル（チャットから自動検出） <span class="tag new">💡NEW</span></span>
+        </div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">・「寝つきが悪い」（4/1）</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">・「夜中に目が覚める」（4/4）</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">・「朝起きるのがつらい」（4/7）</span></div>`;
     } else {
       s.innerHTML = `
         <div class="summary-title">📋 先生に届く受診メモ（前回: 3/12）</div>
@@ -780,6 +859,8 @@ async function startChat() {
 
   if (visitMode === 'first') {
     await startFirstVisitChat();
+  } else if (visitMode === 'memory') {
+    await startMemoryChat();
   } else {
     await startReturnVisitChat();
   }
@@ -1027,6 +1108,247 @@ async function runSerendipity(num) {
     const serenDetail = await waitForUserInput('例：夜中3時頃に目が覚める、朝起きられない...', true);
     if (serenDetail) await addAIMessage('詳しく教えてくれてありがとう', 200);
     await addAIMessage('先生に相談すると、対処法が見つかるかもしれないよ。<br>伝えておくね。', 300);
+  }
+}
+
+// ────────── 確認カード表示 ──────────
+function addConfirmCard(headerEmoji, headerText, rows) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const card = document.createElement('div');
+      card.className = 'confirm-card';
+      const header = document.createElement('div');
+      header.className = 'confirm-card-header';
+      header.innerHTML = headerEmoji + ' ' + headerText;
+      card.appendChild(header);
+
+      const body = document.createElement('div');
+      body.className = 'confirm-card-body';
+      rows.forEach(r => {
+        if (r.type === 'divider') {
+          const div = document.createElement('div');
+          div.className = 'confirm-card-divider';
+          body.appendChild(div);
+        } else if (r.type === 'sub') {
+          const sub = document.createElement('div');
+          sub.className = 'confirm-card-sub';
+          sub.textContent = r.text;
+          body.appendChild(sub);
+        } else {
+          const row = document.createElement('div');
+          row.className = 'confirm-card-row';
+          row.innerHTML = '<span class="clabel">' + r.label + '</span><span class="cvalue">' + r.value + '</span>';
+          body.appendChild(row);
+        }
+      });
+      card.appendChild(body);
+
+      const actions = document.createElement('div');
+      actions.className = 'confirm-card-actions';
+      const okBtn = document.createElement('button');
+      okBtn.className = 'confirm-card-btn primary';
+      okBtn.textContent = '合ってる';
+      const fixBtn = document.createElement('button');
+      fixBtn.className = 'confirm-card-btn';
+      fixBtn.textContent = '修正する';
+
+      okBtn.addEventListener('click', () => {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.7';
+        addUserMessage('合ってる');
+        resolve('ok');
+      });
+      fixBtn.addEventListener('click', () => {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.7';
+        addUserMessage('修正する');
+        resolve('fix');
+      });
+
+      actions.appendChild(okBtn);
+      actions.appendChild(fixBtn);
+      card.appendChild(actions);
+      chatArea.appendChild(card);
+      scrollToBottom();
+    }, 300);
+  });
+}
+
+// ────────── シグナルカード表示 ──────────
+function addSignalCard(title, quotes) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const card = document.createElement('div');
+      card.className = 'signal-card';
+      const header = document.createElement('div');
+      header.className = 'signal-card-header';
+      header.innerHTML = '💡 ' + title;
+      card.appendChild(header);
+
+      quotes.forEach(q => {
+        const quote = document.createElement('div');
+        quote.className = 'signal-quote';
+        quote.textContent = '「' + q.text + '」';
+        card.appendChild(quote);
+        const date = document.createElement('div');
+        date.className = 'signal-date';
+        date.textContent = q.date;
+        card.appendChild(date);
+      });
+
+      const msg = document.createElement('div');
+      msg.style.cssText = 'font-size:13px;color:var(--text-secondary);line-height:1.7;margin-top:8px;';
+      msg.textContent = '先生に相談すると、対処法が見つかるかもしれないよ';
+      card.appendChild(msg);
+
+      const actions = document.createElement('div');
+      actions.className = 'confirm-card-actions';
+      const tellBtn = document.createElement('button');
+      tellBtn.className = 'confirm-card-btn primary';
+      tellBtn.textContent = '先生に伝える';
+      const skipBtn = document.createElement('button');
+      skipBtn.className = 'confirm-card-btn';
+      skipBtn.textContent = '今回は伝えなくていい';
+
+      tellBtn.addEventListener('click', () => {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.7';
+        addUserMessage('先生に伝える');
+        resolve('tell');
+      });
+      skipBtn.addEventListener('click', () => {
+        card.style.pointerEvents = 'none';
+        card.style.opacity = '0.7';
+        addUserMessage('今回は伝えなくていい');
+        resolve('skip');
+      });
+
+      actions.appendChild(tellBtn);
+      actions.appendChild(skipBtn);
+      card.appendChild(actions);
+      chatArea.appendChild(card);
+      scrollToBottom();
+    }, 300);
+  });
+}
+
+// ────────── 記憶蓄積フロー ──────────
+async function startMemoryChat() {
+  initProgress(['準備', '体調', '服薬', '生活', '相談', 'シグナル']);
+
+  await addAIMessage('受診の準備をしておいたよ。<br>確認してね 😊');
+
+  // ① 受診準備サマリー
+  advanceProgress(0);
+  addSectionLabel('① 受診メモのドラフト');
+
+  const summaryResult = await addConfirmCard('📋', '受診メモのドラフト', [
+    { label: '通院中', value: '高血圧' },
+    { label: 'お薬', value: 'アムロジピン 5mg <span style="font-size:11px;color:var(--text-muted);">（マイナ連携）</span>' },
+    { label: 'アレルギー', value: 'なし <span style="font-size:11px;color:var(--text-muted);">（マイナ連携）</span>' },
+    { type: 'divider' },
+    { label: '最近の体調', value: '' },
+    { label: '', value: '頭痛が先週3回（4/2, 4/4, 4/6）' },
+    { label: '', value: '血圧は安定傾向（家庭測定）' },
+  ]);
+
+  if (summaryResult === 'fix') {
+    await addAIMessage('どこを修正する？教えてね', 200);
+    await waitForUserInput('修正したい内容を入力...', true);
+    await addAIMessage('ありがとう、修正しておくね', 200);
+  } else {
+    await addAIMessage('ありがとう！そのまま進めるね', 200);
+  }
+
+  // ② 体調の確認
+  advanceProgress(1);
+  addSectionLabel('② 体調の確認');
+
+  await addAIMessage('先週、頭痛が3回あったみたいだね。<br>それ以外に気になる症状はある？', 300);
+  const healthExtra = await addStructuredCard('それ以外の症状は？', ['特にない、頭痛だけ', 'ほかにもある（教えてね）'], 'single');
+
+  if (healthExtra.includes('ほかにもある')) {
+    await addAIMessage('どんな症状が気になる？', 200);
+    const d = await waitForUserInput('例：めまいがする、肩がこる...', true);
+    if (d) await addAIMessage('わかった、先生に伝えておくね', 200);
+  }
+
+  // ③ 服薬の確認
+  advanceProgress(2);
+  addSectionLabel('③ 服薬の確認');
+
+  await addAIMessage('お薬の記録を見ると、<br>今月2回飲み忘れがあったみたい。<br>合ってる？', 300);
+  const medCheck = await addStructuredCard('飲み忘れについて', ['合ってる', 'もう少し忘れてるかも', 'ちゃんと飲めてるよ'], 'single');
+
+  if (medCheck.includes('もう少し忘れてるかも')) {
+    await addAIMessage('飲み忘れやすいのはどんなとき？', 200);
+    const d = await waitForUserInput('例：朝バタバタして、出張のとき...', true);
+    if (d) await addAIMessage('なるほど、先生に伝えておくね', 200);
+  } else if (medCheck.includes('ちゃんと飲めてるよ')) {
+    await addAIMessage('よかった！記録と違ったところは修正しておくね', 200);
+  }
+
+  // ④ 生活の確認
+  advanceProgress(3);
+  addSectionLabel('④ 生活の確認');
+
+  await addAIMessage('この2週間のことを整理したよ', 300);
+
+  const lifeResult = await addConfirmCard('📊', '生活の記録（直近2週間）', [
+    { label: '🥗 食事', value: '外食 8回 / 自炊 6回' },
+    { type: 'sub', text: '→ 前回より外食が減ったね' },
+    { type: 'divider' },
+    { label: '🏃 運動', value: '散歩 3回（日曜に30分ずつ）' },
+    { type: 'sub', text: '→ 先月より増えたよ' },
+    { type: 'divider' },
+    { label: '🍺 飲酒', value: 'ほぼ毎日（ビール1本くらい）' },
+    { type: 'sub', text: '→ 変わらず' },
+  ]);
+
+  if (lifeResult === 'fix') {
+    await addAIMessage('どのあたりが違う？教えてね', 200);
+    await waitForUserInput('修正したい内容を入力...', true);
+    await addAIMessage('ありがとう、修正しておくね', 200);
+  } else {
+    await addAIMessage('OK！そのまま先生に伝えるね', 200);
+  }
+
+  // ⑤ 先生への相談（候補提示）
+  advanceProgress(4);
+  addSectionLabel('⑤ 先生への相談');
+
+  await addAIMessage('最近こんなこと話してたよね。<br>先生に伝えたいものはある？', 300);
+
+  const consultTopics = await addStructuredCard('先生に伝えたいものを選んでね（複数OK）', [
+    '「薬を飲み続けるのがつらい」（4/3の会話）',
+    '「仕事のストレスで食事が乱れがち」（4/5の会話）',
+    '「血圧が下がってきたから薬減らせるか」（4/7の会話）',
+  ], 'multi');
+
+  if (consultTopics.length > 0) {
+    await addAIMessage('選んでくれたものを先生に伝えるね', 200);
+  }
+
+  await addAIMessage('ほかにも先生に聞きたいことがあれば教えてね', 200);
+  const extra = await waitForUserInput('追加の相談があればここに入力...', true);
+  if (extra) await addAIMessage('ありがとう、それも伝えておくね', 200);
+
+  // ⑥ 気になるシグナル
+  advanceProgress(5);
+  addSectionLabel('⑥ 気になるシグナル');
+
+  await addAIMessage('ちなみに、最近の会話で気になったことがあるよ', 300);
+
+  const signalResult = await addSignalCard('ゆぴぃが気になったこと', [
+    { text: '最近寝つきが悪い', date: '4/1 の会話' },
+    { text: '夜中に目が覚める', date: '4/4 の会話' },
+    { text: '朝起きるのがつらい', date: '4/7 の会話' },
+  ]);
+
+  if (signalResult === 'tell') {
+    await addAIMessage('伝えておくね。<br>先生に相談すると、対処法が見つかるかもしれないよ', 300);
+  } else {
+    await addAIMessage('わかった。気になったらいつでも教えてね', 300);
   }
 }
 </script>
