@@ -266,28 +266,14 @@
   .entry-badge.return { background: #ECFDF5; color: #059669; }
   .entry-badge.memory { background: #FFF7ED; color: #C2410C; }
 
-  .confirm-card {
-    background: var(--card-bg); border-radius: var(--radius); padding: 16px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.06); animation: slideUp 0.4s ease; margin-left: 40px;
-  }
-  .confirm-card-header {
-    display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600;
-    color: var(--text-secondary); margin-bottom: 12px;
-  }
-  .confirm-card-body { font-size: 13px; color: var(--text-primary); line-height: 1.8; }
-  .confirm-card-row { display: flex; align-items: baseline; gap: 8px; }
-  .confirm-card-row .clabel { color: var(--text-secondary); min-width: 60px; flex-shrink: 0; font-size: 12px; }
-  .confirm-card-row .cvalue { flex: 1; }
-  .confirm-card-sub { font-size: 12px; color: var(--text-muted); margin-left: 68px; }
-  .confirm-card-divider { height: 1px; background: var(--border); margin: 8px 0; }
-  .confirm-card-actions { display: flex; gap: 8px; margin-top: 14px; }
-  .confirm-card-btn {
+  .signal-card-actions { display: flex; gap: 8px; margin-top: 14px; }
+  .signal-card-btn {
     flex: 1; padding: 10px; border-radius: var(--radius-xs); font-size: 13px;
     font-weight: 600; cursor: pointer; font-family: inherit; border: 1.5px solid var(--border);
     background: white; color: var(--text-primary); transition: all 0.2s;
   }
-  .confirm-card-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
-  .confirm-card-btn:hover { opacity: 0.85; }
+  .signal-card-btn.primary { background: var(--accent); color: white; border-color: var(--accent); }
+  .signal-card-btn:hover { opacity: 0.85; }
 
   .signal-card {
     background: #FFFBEB; border: 1.5px solid #FCD34D; border-radius: var(--radius); padding: 16px;
@@ -539,8 +525,8 @@ function goToScreen(id) {
     const desc = document.getElementById('checkinDoneDesc');
     const time = document.getElementById('checkinDoneTime');
     if (visitMode === 'memory') {
-      desc.innerHTML = 'ふだんの会話やお薬データをもとに<br>受診メモのドラフトを作ったよ。<br>確認してね。';
-      time.textContent = '⏱ 1〜2分ほどで終わります';
+      desc.innerHTML = '先生があなたの状態を事前に把握でき、<br>診察の時間をより有効に使えます。<br>ふだんの記録も参考にして進めるよ。';
+      time.textContent = '⏱ 2〜3分ほどで終わります';
     } else if (visitMode === 'return') {
       desc.innerHTML = '先生があなたの状態を事前に把握でき、<br>診察の時間をより有効に使えます。<br>前回の回答をもとに更新できます。';
       time.textContent = '⏱ 2〜3分ほどで終わります';
@@ -581,28 +567,38 @@ function goToScreen(id) {
         <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 本人は「歳のせい」と思っていた</span></div>`;
     } else if (visitMode === 'memory') {
       s.innerHTML = `
-        <div class="summary-title">📋 先生に届く受診メモ（記憶蓄積あり）</div>
-        <div class="summary-item"><span class="label">通院中</span><span>高血圧</span></div>
+        <div class="summary-title">📋 先生に届く受診メモ（前回: 3/12）</div>
+        <div class="summary-item"><span class="label">通院中</span><span>高血圧フォロー</span></div>
         <div class="summary-divider"></div>
-        <div class="summary-title" style="margin-top:4px;">💊 服薬（マイナ連携）</div>
+        <div class="summary-title" style="margin-top:4px;">🩺 体調・服薬（問診回答）</div>
+        <div class="summary-item"><span class="label">体調</span><span>変わらない</span></div>
+        <div class="summary-item"><span class="label">服薬</span><span>ときどき忘れる</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 出張時に持っていくのを忘れる</span></div>
+        <div class="summary-divider"></div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin:8px 0 6px;padding:3px 8px;background:var(--selected-bg);border-radius:4px;display:inline-block;">┄ チャット記録から補足 ┄</div>
+        <div class="summary-item"><span class="label">⚠ 体調</span><span>頭痛：先週3回（4/2, 4/4, 4/6）</span></div>
+        <div class="summary-item"><span class="label">血圧</span><span>安定傾向（家庭測定 平均134/82）</span></div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin:8px 0 6px;padding:3px 8px;background:var(--selected-bg);border-radius:4px;display:inline-block;">┄ マイナ連携 ┄</div>
         <div class="summary-item"><span class="label">処方薬</span><span>アムロジピン 5mg</span></div>
         <div class="summary-item"><span class="label">飲み忘れ</span><span>月2回程度（チャット記録）</span></div>
         <div class="summary-item"><span class="label">アレルギー</span><span>なし</span></div>
         <div class="summary-divider"></div>
-        <div class="summary-title" style="margin-top:4px;">🩺 最近の体調（チャット記録） <span class="tag new">⚠ 注目</span></div>
-        <div class="summary-item"><span class="label">頭痛</span><span>先週3回（4/2, 4/4, 4/6）</span></div>
-        <div class="summary-item"><span class="label">血圧</span><span>安定傾向（家庭測定 平均134/82）</span></div>
+        <div class="summary-title" style="margin-top:4px;">🥗 生活の変化（問診回答）</div>
+        <div class="summary-item"><span class="label">食事</span><span>△ 意識して変えた</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 昼は弁当に変えた</span></div>
+        <div class="summary-item"><span class="label">運動</span><span>○ 始めてみた</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 週末に30分散歩している</span></div>
+        <div class="summary-item"><span class="label">飲酒</span><span>× 変わらない</span></div>
         <div class="summary-divider"></div>
-        <div class="summary-title" style="margin-top:4px;">🥗 生活（チャット記録：直近2週間）</div>
-        <div class="summary-item"><span class="label">食事</span><span>外食8回 / 自炊6回</span></div>
-        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 前回より外食減少</span></div>
-        <div class="summary-item"><span class="label">運動</span><span>散歩3回（日曜30分）</span></div>
-        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">→ 先月より増加</span></div>
-        <div class="summary-item"><span class="label">飲酒</span><span>ほぼ毎日（ビール1本）変わらず</span></div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin:8px 0 6px;padding:3px 8px;background:var(--selected-bg);border-radius:4px;display:inline-block;">┄ チャット記録から補足（直近2週間）┄</div>
+        <div class="summary-item"><span class="label">食事</span><span>外食8回 / 自炊6回（前回より外食減）</span></div>
+        <div class="summary-item"><span class="label">運動</span><span>散歩3回（日曜30分・先月より増加）</span></div>
+        <div class="summary-item"><span class="label">飲酒</span><span>ほぼ毎日（ビール1本・変わらず）</span></div>
         <div class="summary-divider"></div>
-        <div class="summary-title" style="margin-top:4px;">🗣 患者が伝えたいこと</div>
-        <div class="summary-item"><span class="label">相談</span><span>薬を飲み続けるのがつらい</span></div>
-        <div class="summary-item"><span class="label">相談</span><span>仕事のストレスで食事が乱れがち</span></div>
+        <div class="summary-item"><span class="label">相談</span><span>血圧は下がってきたが薬を減らせるか</span></div>
+        <div style="font-size:11px;color:var(--accent);font-weight:600;margin:8px 0 6px;padding:3px 8px;background:var(--selected-bg);border-radius:4px;display:inline-block;">┄ チャットから候補追加 ┄</div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">・薬を飲み続けるのがつらい（4/3）</span></div>
+        <div class="summary-item"><span class="label"></span><span style="color:var(--text-secondary);font-size:12px;">・仕事のストレスで食事が乱れ（4/5）</span></div>
         <div class="summary-divider"></div>
         <div class="summary-item">
           <span class="label">検出</span>
@@ -1111,69 +1107,6 @@ async function runSerendipity(num) {
   }
 }
 
-// ────────── 確認カード表示 ──────────
-function addConfirmCard(headerEmoji, headerText, rows) {
-  return new Promise(resolve => {
-    setTimeout(() => {
-      const card = document.createElement('div');
-      card.className = 'confirm-card';
-      const header = document.createElement('div');
-      header.className = 'confirm-card-header';
-      header.innerHTML = headerEmoji + ' ' + headerText;
-      card.appendChild(header);
-
-      const body = document.createElement('div');
-      body.className = 'confirm-card-body';
-      rows.forEach(r => {
-        if (r.type === 'divider') {
-          const div = document.createElement('div');
-          div.className = 'confirm-card-divider';
-          body.appendChild(div);
-        } else if (r.type === 'sub') {
-          const sub = document.createElement('div');
-          sub.className = 'confirm-card-sub';
-          sub.textContent = r.text;
-          body.appendChild(sub);
-        } else {
-          const row = document.createElement('div');
-          row.className = 'confirm-card-row';
-          row.innerHTML = '<span class="clabel">' + r.label + '</span><span class="cvalue">' + r.value + '</span>';
-          body.appendChild(row);
-        }
-      });
-      card.appendChild(body);
-
-      const actions = document.createElement('div');
-      actions.className = 'confirm-card-actions';
-      const okBtn = document.createElement('button');
-      okBtn.className = 'confirm-card-btn primary';
-      okBtn.textContent = '合ってる';
-      const fixBtn = document.createElement('button');
-      fixBtn.className = 'confirm-card-btn';
-      fixBtn.textContent = '修正する';
-
-      okBtn.addEventListener('click', () => {
-        card.style.pointerEvents = 'none';
-        card.style.opacity = '0.7';
-        addUserMessage('合ってる');
-        resolve('ok');
-      });
-      fixBtn.addEventListener('click', () => {
-        card.style.pointerEvents = 'none';
-        card.style.opacity = '0.7';
-        addUserMessage('修正する');
-        resolve('fix');
-      });
-
-      actions.appendChild(okBtn);
-      actions.appendChild(fixBtn);
-      card.appendChild(actions);
-      chatArea.appendChild(card);
-      scrollToBottom();
-    }, 300);
-  });
-}
-
 // ────────── シグナルカード表示 ──────────
 function addSignalCard(title, quotes) {
   return new Promise(resolve => {
@@ -1202,12 +1135,12 @@ function addSignalCard(title, quotes) {
       card.appendChild(msg);
 
       const actions = document.createElement('div');
-      actions.className = 'confirm-card-actions';
+      actions.className = 'signal-card-actions';
       const tellBtn = document.createElement('button');
-      tellBtn.className = 'confirm-card-btn primary';
+      tellBtn.className = 'signal-card-btn primary';
       tellBtn.textContent = '先生に伝える';
       const skipBtn = document.createElement('button');
-      skipBtn.className = 'confirm-card-btn';
+      skipBtn.className = 'signal-card-btn';
       skipBtn.textContent = '今回は伝えなくていい';
 
       tellBtn.addEventListener('click', () => {
@@ -1232,110 +1165,112 @@ function addSignalCard(title, quotes) {
   });
 }
 
-// ────────── 記憶蓄積フロー ──────────
+// ────────── 記憶蓄積フロー（再診ベース＋受診メモ拡張） ──────────
 async function startMemoryChat() {
-  initProgress(['準備', '体調', '服薬', '生活', '相談', 'シグナル']);
+  initProgress(['体調', '生活', '相談', 'シグナル']);
 
-  await addAIMessage('受診の準備をしておいたよ。<br>確認してね 😊');
+  await addAIMessage('問診を始めるね。<br>ふだんの会話の記録も参考にしながら進めるよ 😊');
 
-  // ① 受診準備サマリー
+  // ① 体調・服薬（再診と同じだがチャット記録でコンテキスト付与）
   advanceProgress(0);
-  addSectionLabel('① 受診メモのドラフト');
+  addSectionLabel('① 体調・服薬');
 
-  const summaryResult = await addConfirmCard('📋', '受診メモのドラフト', [
-    { label: '通院中', value: '高血圧' },
-    { label: 'お薬', value: 'アムロジピン 5mg <span style="font-size:11px;color:var(--text-muted);">（マイナ連携）</span>' },
-    { label: 'アレルギー', value: 'なし <span style="font-size:11px;color:var(--text-muted);">（マイナ連携）</span>' },
-    { type: 'divider' },
-    { label: '最近の体調', value: '' },
-    { label: '', value: '頭痛が先週3回（4/2, 4/4, 4/6）' },
-    { label: '', value: '血圧は安定傾向（家庭測定）' },
-  ]);
+  await addAIMessage('今日の診察はどの病気についてかな？', 300);
+  await addStructuredCard('今日の診察はどの病気についてかな？', ['高血圧', '糖尿病', '脂質異常症', 'その他・よくわからない'], 'single');
 
-  if (summaryResult === 'fix') {
-    await addAIMessage('どこを修正する？教えてね', 200);
-    await waitForUserInput('修正したい内容を入力...', true);
-    await addAIMessage('ありがとう、修正しておくね', 200);
-  } else {
-    await addAIMessage('ありがとう！そのまま進めるね', 200);
-  }
+  await addAIMessage('チャットで頭痛が3回あったみたいだけど、<br>体調に変化はあった？', 300);
+  const condition = await addStructuredCard('体調の変化を教えてね', ['よくなった', '変わらない', '悪くなった', '新しい症状がある'], 'single');
 
-  // ② 体調の確認
-  advanceProgress(1);
-  addSectionLabel('② 体調の確認');
-
-  await addAIMessage('先週、頭痛が3回あったみたいだね。<br>それ以外に気になる症状はある？', 300);
-  const healthExtra = await addStructuredCard('それ以外の症状は？', ['特にない、頭痛だけ', 'ほかにもある（教えてね）'], 'single');
-
-  if (healthExtra.includes('ほかにもある')) {
+  if (condition.includes('よくなった')) {
+    await addAIMessage('よかった！どんなところがよくなった？', 200);
+    const d = await waitForUserInput('例：頭痛が減った、体が軽くなった...', true);
+    if (d) await addAIMessage('いいね、先生に伝えておくね', 200);
+  } else if (condition.includes('悪くなった')) {
     await addAIMessage('どんな症状が気になる？', 200);
-    const d = await waitForUserInput('例：めまいがする、肩がこる...', true);
+    const d = await waitForUserInput('例：だるさが続いている、頭痛がする...', true);
     if (d) await addAIMessage('わかった、先生に伝えておくね', 200);
+  } else if (condition.includes('新しい症状がある')) {
+    await addAIMessage('どんな症状が出てきた？', 200);
+    const d = await waitForUserInput('例：めまいがする、動悸がする...', true);
+    if (d) await addAIMessage('先生にしっかり伝えておくね', 200);
   }
 
-  // ③ 服薬の確認
+  await addAIMessage('お薬はちゃんと飲めてる？', 300);
+  const med = await addStructuredCard('お薬の状況を教えてね', ['毎日飲めている', 'ときどき忘れる', 'あまり飲めていない'], 'single');
+
+  if (med.includes('ときどき忘れる') || med.includes('あまり飲めていない')) {
+    await addAIMessage('そうなんだね。飲めていない理由を教えてくれる？', 300);
+    const medReason = await addStructuredCard('当てはまるものを選んでね', ['つい忘れてしまう', '副作用がつらい', '必要を感じない', 'その他'], 'single');
+
+    if (medReason.includes('つい忘れてしまう')) {
+      await addAIMessage('どんなときに忘れやすい？', 200);
+      const d = await waitForUserInput('例：出張のとき、朝バタバタして...', true);
+      if (d) await addAIMessage('なるほど、先生に伝えておくね', 200);
+    } else if (medReason.includes('副作用がつらい')) {
+      await addAIMessage('どんな副作用がある？', 200);
+      const d = await waitForUserInput('例：めまいがする、胃がむかむかする...', true);
+      if (d) await addAIMessage('つらいよね、先生に伝えておくね', 200);
+    } else if (medReason.includes('必要を感じない')) {
+      await addAIMessage('気持ちを聞かせてくれてありがとう。<br>先生に伝えておくね', 200);
+    }
+  }
+
+  // ② 生活の変化（再診と同じ）
+  advanceProgress(1);
+  addSectionLabel('② 生活の変化');
+
+  await addAIMessage('次に、ふだんの生活について教えてね', 300);
+
+  await addAIMessage('前回、外食が多めって話してたね。<br>その後、食事で変えたことはある？', 300);
+  const diet = await addStructuredCard('食事について', ['意識して変えた', 'あまり変わっていない', '前より悪くなったかも'], 'single');
+
+  if (diet.includes('意識して変えた')) {
+    await addAIMessage('どんなことを変えた？', 200);
+    const d = await waitForUserInput('例：昼は弁当にした、塩分を控えている...', true);
+    if (d) await addAIMessage('すごい！先生もきっと喜ぶよ。伝えておくね', 200);
+  } else if (diet.includes('前より悪くなったかも')) {
+    await addAIMessage('何かきっかけがあった？', 200);
+    const d = await waitForUserInput('例：仕事が忙しくてコンビニばかり...', true);
+    if (d) await addAIMessage('そうだったんだね、先生に伝えておくね', 200);
+  }
+
+  await addAIMessage('運動はどうかな？<br>前回はほとんどしていないって話だったけど', 300);
+  const exercise = await addStructuredCard('運動について', ['始めてみた', 'まだできていない', 'やろうと思っているけど...'], 'single');
+
+  if (exercise.includes('始めてみた')) {
+    await addAIMessage('どんな運動をしてる？', 200);
+    const d = await waitForUserInput('例：週末に30分散歩している...', true);
+    if (d) await addAIMessage('いいね！続けているの大事だよ。伝えておくね', 200);
+  } else if (exercise.includes('やろうと思っているけど...')) {
+    await addAIMessage('何か難しいことがある？', 200);
+    const d = await waitForUserInput('例：時間がない、何をすればいいかわからない...', true);
+    if (d) await addAIMessage('なるほど、先生に相談してみよう。伝えておくね', 200);
+  }
+
+  await addAIMessage('お酒の量はどうかな？', 300);
+  const alcohol = await addStructuredCard('飲酒について', ['減らした', '変わらない', '増えたかも'], 'single');
+
+  if (alcohol.includes('減らした')) {
+    await addAIMessage('どんなふうに減らした？', 200);
+    const d = await waitForUserInput('例：休肝日を作った、量を半分にした...', true);
+    if (d) await addAIMessage('ありがとう、先生に伝えておくね', 200);
+  } else if (alcohol.includes('増えたかも')) {
+    await addAIMessage('何かきっかけがあった？', 200);
+    const d = await waitForUserInput('例：飲み会が増えた、ストレスで...', true);
+    if (d) await addAIMessage('教えてくれてありがとう、先生に伝えておくね', 200);
+  }
+
+  // ③ 先生への相談（再診と同じ）
   advanceProgress(2);
-  addSectionLabel('③ 服薬の確認');
+  addSectionLabel('③ 先生への相談');
 
-  await addAIMessage('お薬の記録を見ると、<br>今月2回飲み忘れがあったみたい。<br>合ってる？', 300);
-  const medCheck = await addStructuredCard('飲み忘れについて', ['合ってる', 'もう少し忘れてるかも', 'ちゃんと飲めてるよ'], 'single');
+  await addAIMessage('ありがとう。<br>先生に聞きたいことや相談したいことはある？<br><span style="color:#9CA3AF;font-size:12px;">なければスキップしてね</span>', 300);
+  const consult = await waitForUserInput('例：薬を減らせるか聞きたい...', true);
+  if (consult) await addAIMessage('教えてくれてありがとう。先生に伝えておくね。', 300);
 
-  if (medCheck.includes('もう少し忘れてるかも')) {
-    await addAIMessage('飲み忘れやすいのはどんなとき？', 200);
-    const d = await waitForUserInput('例：朝バタバタして、出張のとき...', true);
-    if (d) await addAIMessage('なるほど、先生に伝えておくね', 200);
-  } else if (medCheck.includes('ちゃんと飲めてるよ')) {
-    await addAIMessage('よかった！記録と違ったところは修正しておくね', 200);
-  }
-
-  // ④ 生活の確認
+  // ④ シグナル検出（セレンディピティの代わり）
   advanceProgress(3);
-  addSectionLabel('④ 生活の確認');
-
-  await addAIMessage('この2週間のことを整理したよ', 300);
-
-  const lifeResult = await addConfirmCard('📊', '生活の記録（直近2週間）', [
-    { label: '🥗 食事', value: '外食 8回 / 自炊 6回' },
-    { type: 'sub', text: '→ 前回より外食が減ったね' },
-    { type: 'divider' },
-    { label: '🏃 運動', value: '散歩 3回（日曜に30分ずつ）' },
-    { type: 'sub', text: '→ 先月より増えたよ' },
-    { type: 'divider' },
-    { label: '🍺 飲酒', value: 'ほぼ毎日（ビール1本くらい）' },
-    { type: 'sub', text: '→ 変わらず' },
-  ]);
-
-  if (lifeResult === 'fix') {
-    await addAIMessage('どのあたりが違う？教えてね', 200);
-    await waitForUserInput('修正したい内容を入力...', true);
-    await addAIMessage('ありがとう、修正しておくね', 200);
-  } else {
-    await addAIMessage('OK！そのまま先生に伝えるね', 200);
-  }
-
-  // ⑤ 先生への相談（候補提示）
-  advanceProgress(4);
-  addSectionLabel('⑤ 先生への相談');
-
-  await addAIMessage('最近こんなこと話してたよね。<br>先生に伝えたいものはある？', 300);
-
-  const consultTopics = await addStructuredCard('先生に伝えたいものを選んでね（複数OK）', [
-    '「薬を飲み続けるのがつらい」（4/3の会話）',
-    '「仕事のストレスで食事が乱れがち」（4/5の会話）',
-    '「血圧が下がってきたから薬減らせるか」（4/7の会話）',
-  ], 'multi');
-
-  if (consultTopics.length > 0) {
-    await addAIMessage('選んでくれたものを先生に伝えるね', 200);
-  }
-
-  await addAIMessage('ほかにも先生に聞きたいことがあれば教えてね', 200);
-  const extra = await waitForUserInput('追加の相談があればここに入力...', true);
-  if (extra) await addAIMessage('ありがとう、それも伝えておくね', 200);
-
-  // ⑥ 気になるシグナル
-  advanceProgress(5);
-  addSectionLabel('⑥ 気になるシグナル');
+  addSectionLabel('④ 気になるシグナル');
 
   await addAIMessage('ちなみに、最近の会話で気になったことがあるよ', 300);
 
